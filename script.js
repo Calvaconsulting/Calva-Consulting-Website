@@ -202,10 +202,11 @@
     }
   }
 
-  /* ---------- contact form (front-end only) ---------- */
+  /* ---------- contact form (Netlify Forms) ---------- */
   const form = document.querySelector(".contact__form");
   if (form) {
     const note = form.querySelector(".contact__note");
+    const submitBtn = form.querySelector("button[type='submit']");
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const name = form.querySelector("#name");
@@ -216,9 +217,25 @@
         note.textContent = "Please add your name and a valid email.";
         return;
       }
-      note.style.color = "#7fd8a0";
-      note.textContent = "Thanks — this demo form isn't wired up yet. [EDIT: connect to email/Formspree.]";
-      form.reset();
+
+      submitBtn.disabled = true;
+      fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(new FormData(form)).toString(),
+      })
+        .then(() => {
+          note.style.color = "#7fd8a0";
+          note.textContent = "Thanks — I'll reply personally soon.";
+          form.reset();
+        })
+        .catch(() => {
+          note.style.color = "#f0a58f";
+          note.textContent = "Something went wrong — please email me directly instead.";
+        })
+        .finally(() => {
+          submitBtn.disabled = false;
+        });
     });
   }
 })();
